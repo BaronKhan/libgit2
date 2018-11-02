@@ -1,6 +1,3 @@
-/**
- * replace jsgitprogresscallback with your own progress message handler.
- */
 jsgitprogresscallback = function(progressmessage) {
     console.log(progressmessage);
 }
@@ -23,3 +20,7 @@ jsgitprintlatestcommit = cwrap('jsgitprintlatestcommit', null, []);
 jsgitcommit = cwrap('jsgitcommit', null, ['string']);
 jsgithistory = cwrap('jsgithistory', null, []);
 jsgitregisterfilter = cwrap('jsgitregisterfilter', null, ['string', 'string', 'number']);
+
+jsgitstartwalk = cwrap('jsgitstartwalk', null, []);
+jsgitwalknextcommit = cwrap('jsgitwalknextcommit', 'string', []);
+jsgitendwalk = cwrap('jsgitendwalk', null, []);

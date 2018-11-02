@@ -298,7 +298,6 @@ void EMSCRIPTEN_KEEPALIVE jsgitprintlatestcommit()
 	}	
 }
 
-
 void jsgithistoryvisitcommit(git_commit *c)
 {
 	size_t i, num_parents = git_commit_parentcount(c);
@@ -997,6 +996,60 @@ void EMSCRIPTEN_KEEPALIVE jsgitregisterfilter(char * name, char * attributes, in
 	filter->apply = jsfilter_apply;
 	
 	git_filter_register(name, filter, priority);
+}
+
+static git_revwalk *walk = NULL;
+static git_object *obj = NULL;
+static char git_commit_data[10000];
+
+void EMSCRIPTEN_KEEPALIVE jsgitstartwalk() {
+	if (walk) {
+		printf("Error: already started revwalk\n");
+		return;
+	}
+  if (git_revwalk_new(&walk, repo) < 0) {
+  	printf("Error occurred while starting new rev walk\n");
+  	return;
+	}
+	git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL | GIT_SORT_TIME);
+  git_revwalk_push_head(walk);
+  // git_revwalk_hide_glob(walk, "tags/*");
+
+  //git_revparse_single(&obj, repo, "HEAD~10");
+  //git_revwalk_hide(walk, git_object_id(obj));
+  //git_object_free(obj);
+  obj = NULL;
+}
+
+// Return JSON representation for commit data
+char * EMSCRIPTEN_KEEPALIVE jsgitwalknextcommit() {
+	if (!walk) {
+		printf("Error: no revwalk in progress\n");
+		return "";
+	}
+	git_oid oid;
+	if (git_revwalk_next(&oid, walk) == 0) {
+    git_commit *c;
+    char oidstr[10] = {0};
+    git_commit_lookup(&c, repo, &oid);
+    git_oid_tostr(oidstr, 9, &oid);
+    printf("%s\n%s\n\n", oidstr, git_commit_message(c));
+    snprintf(git_commit_data, sizeof(char)*5000, "%s", git_commit_message(c));
+    git_commit_free(c);
+  }
+  else {
+  	return "___NULL___";	// Special string to detect end of revwalk
+  }
+  return git_commit_data;
+}
+
+void EMSCRIPTEN_KEEPALIVE jsgitendwalk() {
+	if (!walk) {
+		printf("Error: no revwalk in progress\n");
+		return;
+	}
+  git_revwalk_free(walk);
+  walk = NULL;
 }
 
 #endif
