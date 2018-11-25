@@ -1021,7 +1021,7 @@ void EMSCRIPTEN_KEEPALIVE jsgitstartwalk() {
   obj = NULL;
 }
 
-// Return JSON representation for commit data
+// Return JSON representation for commit data (includes invalid newline in message)
 char * EMSCRIPTEN_KEEPALIVE jsgitwalknextcommit() {
 	if (!walk) {
 		printf("Error: no revwalk in progress\n");
@@ -1033,8 +1033,10 @@ char * EMSCRIPTEN_KEEPALIVE jsgitwalknextcommit() {
     char oidstr[10] = {0};
     git_commit_lookup(&c, repo, &oid);
     git_oid_tostr(oidstr, 9, &oid);
-    printf("%s\n%s\n\n", oidstr, git_commit_message(c));
-    snprintf(git_commit_data, sizeof(char)*5000, "%s", git_commit_message(c));
+    // printf("%s\n%s\n\n", oidstr, git_commit_message(c));
+    snprintf(git_commit_data, sizeof(char)*5000,
+    	"{\"author\": \"%s\", \"email\": \"%s\", \"message\": \"%s\", \"time\": \"%lld\"}",
+    	git_commit_author(c)->name, git_commit_author(c)->email, git_commit_message(c), git_commit_time(c));
     git_commit_free(c);
   }
   else {
