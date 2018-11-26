@@ -1,5 +1,15 @@
+var progressPercent = 0;
+var progressState = "none";
+
 jsgitprogresscallback = function(progressmessage) {
     console.log(progressmessage);
+    if (progressmessage.includes("Resolving deltas")) {
+      progressState = "resolving";
+    } else if (progressmessage.includes("chk ")) {
+      progressState = "cloning";
+    } else {
+      progress = "none";
+    }
 }
 
 jsgitinit = cwrap('jsgitinit', null, []);
