@@ -42,3 +42,6 @@ emscripten_hacks/node_modules
 .vscode
 *.profdata
 *.profraw
+
+emscripten_hacks/libgit2.js
+emscripten_hacks/libgit2.wasm
