@@ -2,14 +2,30 @@ var progressPercent = 0;
 var progressState = "none";
 
 jsgitprogresscallback = function(progressmessage) {
-    console.log(progressmessage);
-    if (progressmessage.includes("Resolving deltas")) {
-      progressState = "resolving";
-    } else if (progressmessage.includes("chk ")) {
-      progressState = "cloning";
-    } else {
-      progress = "none";
+  console.log(progressmessage);
+  if (progressmessage.includes("Resolving deltas")) {
+    progressState = "resolving";
+    var regexp = /Resolving deltas ([0-9]+)\/([0-9]+)/g;
+    var match = regexp.exec(progressmessage);
+    if (match && match.length > 2) {
+      var x = parseInt(match[1]);
+      var y = parseInt(match[2]);
+      if (y == 0) { progressPercent = 90; }
+      else {
+        progressPercent = 90 + Math.floor((x*10)/y);
+      }
     }
+  } else if (progressmessage.includes("chk ")) {
+    progressState = "cloning";
+    var regexp = /net  ([0-9]{1,3})/g;
+    var match = regexp.exec(progressmessage);
+    if (match && match.length > 1) {
+      progressPercent = Math.floor((parseInt(match[1])*90)/100);
+    }
+  } else {
+    progress = "none";
+  }
+  self.postMessage({ "cloneprogress": progressPercent });
 }
 
 jsgitinit = cwrap('jsgitinit', null, []);
