@@ -20,6 +20,9 @@
 
 static git_repository *repo = NULL;
 
+static int old_network_percent = 0;
+static int old_indexed_deltas = 0;
+
 typedef struct progress_data {
 	git_transfer_progress fetch_progress;
 	size_t completed_steps;
@@ -32,6 +35,15 @@ static void print_progress(const progress_data *pd)
 	int network_percent = pd->fetch_progress.total_objects > 0 ?
 		(100*pd->fetch_progress.received_objects) / pd->fetch_progress.total_objects :
 		0;
+
+	if (network_percent == old_network_percent &&
+			pd->fetch_progress.indexed_deltas == old_indexed_deltas)
+	{
+		return;
+	}
+	old_network_percent = network_percent;
+	old_indexed_deltas = pd->fetch_progress.indexed_deltas;
+
 	int index_percent = pd->fetch_progress.total_objects > 0 ?
 		(100*pd->fetch_progress.indexed_objects) / pd->fetch_progress.total_objects :
 		0;
@@ -209,7 +221,9 @@ void EMSCRIPTEN_KEEPALIVE jsgitopenrepo() {
 	git_repository_open(&repo, ".");
 }
 
-void EMSCRIPTEN_KEEPALIVE jsgitclone(char * url, char * localdir) {			
+void EMSCRIPTEN_KEEPALIVE jsgitclone(char * url, char * localdir) {
+	old_network_percent = 0;
+	old_indexed_deltas = 0;	
 	cloneremote(url,localdir);		
 }
 
