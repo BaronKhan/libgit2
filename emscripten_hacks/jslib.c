@@ -221,6 +221,10 @@ void EMSCRIPTEN_KEEPALIVE jsgitopenrepo() {
 	git_repository_open(&repo, ".");
 }
 
+void EMSCRIPTEN_KEEPALIVE jsgitopenrepopath(char * path) {
+	git_repository_open(&repo, path);
+}
+
 void EMSCRIPTEN_KEEPALIVE jsgitclone(char * url, char * localdir) {
 	old_network_percent = 0;
 	old_indexed_deltas = 0;	

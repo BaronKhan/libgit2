@@ -32,6 +32,7 @@ jsgitinit = cwrap('jsgitinit', null, []);
 jsgitclone = cwrap('jsgitclone', null, ['string', 'string']);
 jsgitinitrepo = cwrap('jsgitinitrepo', null, ['number']);
 jsgitopenrepo = cwrap('jsgitopenrepo', null, []);
+jsgitopenrepopath = cwrap('jsgitopenrepopath', null, ['string']);
 jsgitadd = cwrap('jsgitadd', null, ['string']);
 jsgitsetuser = cwrap('jsgitsetuser', null, ['string', 'string']);
 jsgitresolvemergecommit = cwrap('jsgitresolvemergecommit', null, []);
