@@ -11,9 +11,7 @@ jsgitprogresscallback = function(progressmessage) {
       var x = parseInt(match[1]);
       var y = parseInt(match[2]);
       if (y == 0) { progressPercent = 90; }
-      else {
-        progressPercent = 90 + Math.floor((x*10)/y);
-      }
+      else { progressPercent = 90 + Math.floor((x*10)/y); }
     }
   } else if (progressmessage.includes("chk ")) {
     progressState = "cloning";
