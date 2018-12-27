@@ -136,8 +136,13 @@ int cloneremote(const char * url,const char * path)
   printf("\n");
   if (error != 0) {
     const git_error *err = giterr_last();
-    if (err) printf("ERROR %d: %s\n", err->klass, err->message);
-    else printf("ERROR %d: no detailed info\n", error);
+    if (err) {
+      printf("ERROR %d: %s\n", err->klass, err->message);
+      EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, err->message);
+    } else {
+      printf("ERROR %d: no detailed info\n", error);
+      EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Error occurred while cloning.");
+    }
   } 
   return error;
 }
@@ -219,19 +224,25 @@ void EMSCRIPTEN_KEEPALIVE jsgitinitrepo(unsigned int bare) {
  */
 void EMSCRIPTEN_KEEPALIVE jsgitopenrepo() {
   int error = git_repository_open(&repo, ".");
-  if (error != 0)
+  if (error != 0) {
     printf("error while opening repo: %d\n", error);
-  else
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Error occurred while opening repository");
+  }
+  else {
     printf("opened repo\n");
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE jsgitopenrepopath(char * path) {
   printf("opening repo\n");
   int error = git_repository_open(&repo, path);
-  if (error != 0)
+  if (error != 0) {
     printf("error while opening repo: %d\n", error);
-  else
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Error occurred while opening repository");
+  }
+  else {
     printf("opened repo\n");
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE jsgitclone(char * url, char * localdir) {
@@ -1031,16 +1042,19 @@ static char git_commit_data[10000];
 void EMSCRIPTEN_KEEPALIVE jsgitstartwalk() {
   if (walk) {
     printf("Error: already started revwalk\n");
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Already started revwalk");
     return;
   }
   if (git_revwalk_new(&walk, repo) < 0) {
     printf("Error occurred while starting new rev walk\n");
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Could not start revwalk");
     walk = NULL;
     return;
   }
   git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL | GIT_SORT_TIME);
   if (git_revwalk_push_head(walk) < 0) {
     printf("Error occurred while pushing head\n");
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "Could not push HEAD to revwalk");
     walk = NULL;
     return;
   }
@@ -1050,6 +1064,7 @@ void EMSCRIPTEN_KEEPALIVE jsgitstartwalk() {
 char * EMSCRIPTEN_KEEPALIVE jsgitwalknextcommit() {
   if (!walk) {
     printf("Error: no revwalk in progress\n");
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "No revwalk in progress");
     return "";
   }
   git_oid oid;
@@ -1073,6 +1088,7 @@ char * EMSCRIPTEN_KEEPALIVE jsgitwalknextcommit() {
 void EMSCRIPTEN_KEEPALIVE jsgitendwalk() {
   if (!walk) {
     printf("Error: no revwalk in progress\n");
+    EM_ASM_({ jsgiterrorcallback(Pointer_stringify($0)); }, "No revwalk in progress");
     return;
   }
   git_revwalk_free(walk);

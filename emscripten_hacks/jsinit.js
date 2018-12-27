@@ -26,6 +26,10 @@ jsgitprogresscallback = function(progressmessage) {
   self.postMessage({ "cloneprogress": progressPercent });
 }
 
+jsgiterrorcallback = function(message) {
+  self.postMessage({ "___ERROR___": message });
+}
+
 jsgitinit = cwrap('jsgitinit', null, []);
 jsgitclone = cwrap('jsgitclone', null, ['string', 'string']);
 jsgitinitrepo = cwrap('jsgitinitrepo', null, ['number']);
