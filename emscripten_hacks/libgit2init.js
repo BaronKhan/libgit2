@@ -15,10 +15,13 @@ jsgitprogresscallback = function(progressmessage) {
     }
   } else if (progressmessage.includes("chk ")) {
     progressState = "cloning";
-    var regexp = /net  ([0-9]{1,3})/g;
+    var regexp = /net\W*([0-9]{1,3})%[\S\W]+\W([0-9]+)\)\W* \//g;
     var match = regexp.exec(progressmessage);
     if (match && match.length > 1) {
       progressPercent = Math.floor((parseInt(match[1])*90)/100);
+      if (match.length > 2 && parseInt(match[2]) > 5000) {
+        self.postMessage({ "___TOOBIG___": parseInt(match[2]) })
+      }
     }
   } else {
     progress = "none";
